@@ -46,8 +46,37 @@ class ModelTrainer:
                 'AdaBoost': AdaBoostRegressor()
             }
 
+            params = {
+                "Decision Tree": {
+                    'criterion': ['squared_error', 'friedman_mse', 'absolute_error', 'poisson']
+            },
+            "Random Forest": {
+                    'n_estimators': [8, 16, 32, 64],
+                    'criterion': ['squared_error', 'friedman_mse', 'absolute_error', 'poisson']
+                },
+                "Gradient Boosting": {
+                    'loss': ['squared_error', 'absolute_error', 'huber', 'quantile'],
+                    'learning_rate': [0.01, 0.1, 0.2, 0.3],
+                    'n_estimators': [50, 100, 200]
+                },
+                "XGBoost": {
+                    'learning_rate': [0.01, 0.1, 0.2],
+                    'n_estimators': [50, 100, 200],
+                    'max_depth': [3, 5, 7]
+                },
+                "KNeighbors": {
+                    'n_neighbors': [3, 5, 7, 9],
+                    'weights': ['uniform', 'distance']
+                },
+                "CatBoost": {
+                    'depth': [4, 6, 8],
+                    'learning_rate': [0.01, 0.1],
+                    'iterations': [100, 200]
+                }
+            }
+
             model_report:dict = evaluate_models(X_train = X_train, y_train = y_train, X_test = X_test, y_test=y_test ,
-                                                models=models) 
+                                                models=models, params=params)
             
             best_model_score = max(sorted(model_report.values()))
             best_model_name = list(model_report.keys())[
@@ -67,5 +96,6 @@ class ModelTrainer:
             predicted = best_model.predict(X_test)
             r2_square = r2_score(y_test, predicted)
             return r2_score
-        except:
-            pass
+        except Exception as e:
+            logging.error("Error in model training: %s", str(e))   
+            raise CustomException(e, sys) from e
